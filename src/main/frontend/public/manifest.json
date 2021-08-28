@@ -1,0 +1,8 @@
+{
+  "short_name": "wsmessenger_frontend",
+  "name": "WebSocket Instant Messaging App Frontend",
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#000000",
+  "background_color": "#ffffff"
+}
