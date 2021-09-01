@@ -18,14 +18,18 @@ import java.util.List;
 public class WebSocketConfiguration implements WebSocketMessageBrokerConfigurer {
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
-        registry.enableSimpleBroker();
-        registry.setApplicationDestinationPrefixes("chat/v1");
-        registry.setUserDestinationPrefix("user/v1");
+        registry.enableSimpleBroker("/user");
+        registry.setApplicationDestinationPrefixes("/app");
+        registry.setUserDestinationPrefix("/user");
     }
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/ws").withSockJS();
+        registry.addEndpoint("/ws").setAllowedOrigins(
+//                "http://localhost:8080", "http://192.168.0.165:8080",
+                "http://localhost:3000", "http://192.168.0.165:3000"
+        )
+                .withSockJS();
     }
 
     @Override

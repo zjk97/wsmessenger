@@ -1,15 +1,15 @@
 package com.rottyuniversity.wsmessenger.model;
 
-import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.time.Instant;
+import java.util.Date;
 
 @Document
 @Data
-@Builder
+@NoArgsConstructor
 public class ChatMessage {
     @Id
     private String id;
@@ -20,7 +20,7 @@ public class ChatMessage {
 
     private String content;
 
-    private Instant timestamp;
+    private Date timestamp;
 
     private MessageStatus status;
 }

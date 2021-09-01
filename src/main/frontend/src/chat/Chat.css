@@ -1,0 +1,16 @@
+.messageBox {
+    height: 100px;
+    width: 100px;
+    overflow-y: scroll;
+    font-size: 12px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.currentUser {
+    color: gold;
+}
+
+.partnerUser {
+    color: chartreuse;
+}

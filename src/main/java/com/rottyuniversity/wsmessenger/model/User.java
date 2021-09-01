@@ -19,4 +19,6 @@ public class User {
     private String password;
 
     private List<String> chatRooms;
+
+    private List<String> openedChats;
 }
