@@ -1,13 +1,13 @@
 package com.rottyuniversity.wsmessenger.service;
 
+import com.google.common.collect.ImmutableSet;
 import com.rottyuniversity.wsmessenger.model.User;
 import com.rottyuniversity.wsmessenger.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class UserService {
@@ -22,15 +22,15 @@ public class UserService {
         return userRepository.findUserById(id);
     }
 
-    public List<String> getOpenedChats(String userId) {
+    public Set<String> getOpenedChats(String userId) {
         Optional<User> userOpt = userRepository.findUserById(userId);
         if (userOpt.isPresent()) {
             if (userOpt.get().getOpenedChats() == null) {
-                return new ArrayList<>();
+                return ImmutableSet.of();
             }
             return userOpt.get().getOpenedChats();
         }
 
-        return new ArrayList<>();
+        return ImmutableSet.of();
     }
 }

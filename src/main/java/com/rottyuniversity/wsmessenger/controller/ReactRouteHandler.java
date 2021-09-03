@@ -9,4 +9,10 @@ public class ReactRouteHandler {
     public String redirectForReact() {
         return "forward:/index.html";
     }
+
+    // maps every path that's not mapped to another controller and doesn't contain dots to index.html
+//    @RequestMapping(value = "/{[path:[^\\.]*}")
+//    public String redirect() {
+//        return "forward:/index.html";
+//    }
 }

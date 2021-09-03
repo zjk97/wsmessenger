@@ -19,14 +19,6 @@ function Chat(props) {
         messagesEndRef.current.scrollIntoView({behavior: 'smooth'});
     });
 
-    useEffect(() => {
-        if (localStorage.getItem("currentUser") == null) {
-            props.history.push("/login");
-        } else {
-            connect();
-        }
-    }, []);
-
     // load opened chats only once, provide empty dependency array
     useEffect(() => {
         axios.post('/user/v1/openedChats?userId=' + currentUser.current).then(r => {
@@ -44,6 +36,14 @@ function Chat(props) {
         }
         stompClient.current.connect({}, onConnected, onError);
     }
+
+    useEffect(() => {
+        if (localStorage.getItem("currentUser") == null) {
+            props.history.push("/login");
+        } else {
+            connect();
+        }
+    }, [props.history, connect]);
 
     const onConnected = () => {
         console.log("connected");
@@ -122,7 +122,13 @@ function Chat(props) {
 
     return (
         <div>
-            <OpenedChats openedChats={openedChats} selectNewChat={(selected) => setSelectedChat(selected)}
+            <OpenedChats currentUser={currentUser.current}
+                         openNewChat={(newSelectedChat, newChats) => {
+                             setOpenedChats(newChats);
+                             setSelectedChat(newSelectedChat);
+                         }}
+                         openedChats={openedChats}
+                         selectNewChat={(selected) => setSelectedChat(selected)}
                          selectedChat={selectedChat}/>
             <div className={"messageBox"}>
                 {messages}

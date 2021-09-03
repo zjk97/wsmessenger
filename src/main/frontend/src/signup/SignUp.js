@@ -18,7 +18,9 @@ function SignUp(props) {
 
         axios.post('/user/v1/signup', {
             id: username,
-            password: password
+            password: password,
+            chatRooms: [],
+            openedChats: []
         }).then(r => {
             if (r.status === 400) {
                 alert("Username already taken, try another one.")

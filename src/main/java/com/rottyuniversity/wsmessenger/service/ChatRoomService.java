@@ -8,7 +8,7 @@ import com.rottyuniversity.wsmessenger.util.UserUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,12 +26,12 @@ public class ChatRoomService {
             return ret.get();
         }
 
-        ChatRoom chatRoom = ChatRoom.builder().id(chatRoomId).lastActive(Instant.now()).build();
+        ChatRoom chatRoom = ChatRoom.builder().id(chatRoomId).lastActive(new Date()).build();
         for (User user : users) {
             user.getChatRooms().add(chatRoomId);
             userRepository.save(user);
         }
-        
+
         return chatRoomRepository.save(chatRoom);
     }
 }

@@ -5,20 +5,25 @@ import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.util.List;
+import javax.validation.constraints.NotNull;
+import java.util.Set;
 
 @Document
 @Data
 @Builder
 public class User {
     @Id
+    @NotNull
     private String id;
 
     private String nickName;
 
+    @NotNull
     private String password;
 
-    private List<String> chatRooms;
+    @NotNull
+    private Set<String> chatRooms;
 
-    private List<String> openedChats;
+    @NotNull
+    private Set<String> openedChats;
 }

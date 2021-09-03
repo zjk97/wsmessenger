@@ -4,24 +4,33 @@ import com.rottyuniversity.wsmessenger.model.User;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class UserUtil {
     public static String getChatRoomIdByUsers(List<User> users) {
-        Collections.sort(users, Comparator.comparing(User::getId));
-        StringBuilder sb = new StringBuilder();
-        Iterator<User> iterator = users.iterator();
+        List<String> userIds = users
+                .stream()
+                .map((user -> user.getId()))
+                .collect(Collectors.toList());
 
-        for (int i = 0; i < users.size() - 1; i++) {
+        return getChatRoomIdByUserIds(userIds);
+    }
+
+    public static String getChatRoomIdByUserIds(List<String> userIds) {
+        Collections.sort(userIds);
+        StringBuilder sb = new StringBuilder();
+        Iterator<String> iterator = userIds.iterator();
+
+        for (int i = 0; i < userIds.size() - 1; i++) {
             sb
-                    .append(iterator.next().getId().replace("_", "__"))
+                    .append(iterator.next().replace("_", "__"))
                     .append(" _ ");
         }
 
         if (iterator.hasNext()) {
-            sb.append(iterator.next().getId());
+            sb.append(iterator.next());
         }
 
         return sb.toString();
@@ -31,7 +40,7 @@ public class UserUtil {
         String[] split = chatRoomId.split(" _ ", -1);
         List<String> ret = new ArrayList<>(split.length);
 
-        for (int i=0; i<split.length; i++) {
+        for (int i = 0; i < split.length; i++) {
             ret.add(split[i].replace("__", "_"));
         }
 
