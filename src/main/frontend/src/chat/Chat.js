@@ -1,29 +1,34 @@
-import React, {useEffect, useRef, useState} from "react";
+import React, {useEffect, useRef} from "react";
+import useState from "react-usestateref";
 import "./Chat.css"
 import ChatBox from "./ChatBox";
 import OpenedChats from "./OpenedChats";
 import axios from "axios";
+import MessageBox from "./MessageBox";
 
 function Chat(props) {
-    const messagesEndRef = useRef(null);
-    const [messages, setMessages] = useState([]);
-    const [selectedChat, setSelectedChat] = useState("");
-    const [openedChats, setOpenedChats] = useState(["Loading..."]);
+    const [displayedMessages, setDisplayedMessages] = useState([]);
+    const [selectedChat, setSelectedChat, selectedChatRef] = useState("");
+    const [openedChats, setOpenedChats, openedChatsRef] = useState(["Loading..."]);
 
-    let keyCount = useRef(0);
     let stompClient = useRef(null);
     let currentUser = useRef(localStorage.getItem("currentUser"));
+    let allMessages = useRef(new Map());
     const localMessageLimit = 30;
-
-    useEffect(() => {
-        messagesEndRef.current.scrollIntoView({behavior: 'smooth'});
-    });
 
     // load opened chats only once, provide empty dependency array
     useEffect(() => {
         axios.post('/user/v1/openedChats?userId=' + currentUser.current).then(r => {
             setOpenedChats(r.data);
         });
+    }, []);
+
+    useEffect(() => {
+        if (localStorage.getItem("currentUser") == null) {
+            props.history.push("/login");
+        } else {
+            connect();
+        }
     }, []);
 
     const connect = () => {
@@ -36,14 +41,6 @@ function Chat(props) {
         }
         stompClient.current.connect({}, onConnected, onError);
     }
-
-    useEffect(() => {
-        if (localStorage.getItem("currentUser") == null) {
-            props.history.push("/login");
-        } else {
-            connect();
-        }
-    }, [props.history, connect]);
 
     const onConnected = () => {
         console.log("connected");
@@ -64,47 +61,31 @@ function Chat(props) {
         console.log("received");
         const body = JSON.parse(message.body);
         const content = body["content"];
-        const partner = body["senderId"];
-        let newMessages = [...messages];
+        const sender = body["senderId"];
+        const chatRoomId = body["chatRoomId"];
 
-        newMessages.push((
-            <div key={keyCount.current}>
-                <div className={"partnerUser"}>
-                    {partner}:
-                </div>
-                <div>
-                    {content}
-                </div>
-            </div>
-        ));
-        keyCount.current += 1;
+        if (!allMessages.current.has(chatRoomId)) {
+            allMessages.current.set(chatRoomId, []);
+            // TODO: load from database
+        }
+        const targetMessages = allMessages.current.get(chatRoomId);
+        targetMessages.push([sender, content]);
+        console.log(targetMessages);
 
-        setMessages(newMessages);
+        if (selectedChatRef.current === chatRoomId) {
+            setDisplayedMessages([...targetMessages]);
+        }
     }
 
     const send = (message) => {
         message = message.trim();
         if (message !== "") {
             // alert(currentMessage);
-            let newMessages = [...messages];
+            let newMessages = [...displayedMessages];
 
             if (newMessages.length >= localMessageLimit) {
                 // do nothing for now, replace with queue logic later smh javascript
             }
-
-            newMessages.push((
-                <div key={keyCount.current}>
-                    <div className={"currentUser"}>
-                        {localStorage.getItem("currentUser")}:
-                    </div>
-                    <div>
-                        {message}
-                    </div>
-                </div>
-            ));
-            keyCount.current += 1;
-
-            setMessages(newMessages);
 
             // send to server
             const pojo = {
@@ -117,6 +98,16 @@ function Chat(props) {
             // test security:
             // stompClient.current.send("/user/" + username + "/queue/messages", {}, JSON.stringify(pojo));
             stompClient.current.send("/app/chat", {}, JSON.stringify(pojo));
+
+            // display for client
+            if (!allMessages.current.has(selectedChat)) {
+                allMessages.current.set(selectedChat, []);
+                // TODO: load from database
+            }
+            const targetMessages = allMessages.current.get(selectedChat);
+            targetMessages.push([currentUser.current, message]);
+
+            setDisplayedMessages([...targetMessages]);
         }
     }
 
@@ -127,13 +118,14 @@ function Chat(props) {
                              setOpenedChats(newChats);
                              setSelectedChat(newSelectedChat);
                          }}
-                         openedChats={openedChats}
-                         selectNewChat={(selected) => setSelectedChat(selected)}
-                         selectedChat={selectedChat}/>
-            <div className={"messageBox"}>
-                {messages}
-                <div ref={messagesEndRef}/>
-            </div>
+                         openedChats={openedChatsRef.current}
+                         selectNewChat={(selected) => {
+                             setDisplayedMessages(allMessages.current.has(selected)
+                                 ? allMessages.current.get(selected) : []);
+                             setSelectedChat(selected);
+                         }}
+                         selectedChat={selectedChatRef.current}/>
+            <MessageBox displayedMessages={displayedMessages}/>
             <ChatBox send={send}/>
         </div>
     );
